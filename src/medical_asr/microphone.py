@@ -53,10 +53,8 @@ class MicroPhoneServer:
             if not self.is_running:
                 break
             message = await serve.recv()
-            if message != "":
-                print(message)
-                if self.callback:
-                    self.callback(message)
+            if message != "" and self.callback:
+                self.callback(message)
 
     async def _run(self):
         async with connect("ws://localhost:8765") as ws:

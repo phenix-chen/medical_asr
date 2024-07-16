@@ -1,4 +1,5 @@
-from medical_asr.asr_server import main
+from medical_asr.asr_server import AsrServer
 
 if __name__ == "__main__":
-    main()
+    server = AsrServer()
+    server.start()

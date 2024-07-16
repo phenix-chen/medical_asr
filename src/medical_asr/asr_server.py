@@ -1,25 +1,23 @@
 import asyncio
-from multiprocessing import Queue
-from typing import Optional
 
 from websockets.server import serve
 
 from medical_asr.model import SeacoASRModel
 
 
-def main(queue: Optional[Queue] = None):
-    model = SeacoASRModel()
+class AsrServer:
+    def __init__(self):
+        self.model = SeacoASRModel()
 
-    async def echo(websocket):
+    async def process_audio(self, websocket):
         async for message in websocket:
-            if not isinstance(message, str):
-                text = model.recognize(message)
+            if isinstance(message, bytes):
+                text = self.model.recognize(message)
                 await websocket.send(text)
 
-    async def run():
-        async with serve(echo, "localhost", 8765):
+    async def run(self):
+        async with serve(self.process_audio, "localhost", 8765):
             await asyncio.Future()
 
-    if queue:
-        queue.put(1)
-    asyncio.run(run())
+    def start(self):
+        asyncio.run(self.run())
