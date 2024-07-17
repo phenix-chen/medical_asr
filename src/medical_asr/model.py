@@ -1,5 +1,8 @@
+import os
+
 from funasr import AutoModel
 from xpinyin import Pinyin
+
 from medical_asr.download import check_or_download_models
 
 
@@ -36,7 +39,14 @@ class HotwordCorrect:
 
 class SeacoASRModel:
     def __init__(self) -> None:
-        model, vad = check_or_download_models()
+        # model, vad = check_or_download_models()
+
+        model = "iic/speech_seaco_paraformer_large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
+        vad = "iic/speech_fsmn_vad_zh-cn-16k-common-pytorch"
+        home = os.path.expanduser("~")
+        path = os.path.join(home, r".cache\modelscope\hub")
+        model = os.path.join(path, model)
+        vad = os.path.join(path, vad)
         self.asr_model = AutoModel(
             disable_pbar=True,
             model=model,
