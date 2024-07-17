@@ -39,16 +39,28 @@ class MyWidget(QWidget):
     def _init_servers(self):
         # 创建并启动语音识别服务进程
         asr_path = os.path.join(os.path.dirname(__file__), 'asr_server.py')
+        env = os.environ.copy()
+        env["PYTHONUNBUFFERED"] = "1"
         self.asr_process = subprocess.Popen(['python', asr_path], stdout=subprocess.PIPE,
-                                            stderr=subprocess.PIPE)
-        while True:
-            output = self.asr_process.stdout.readline()
+                                            stderr=subprocess.PIPE, env=env)
 
+        # 不断读取ASR服务进程的输出，直到服务启动或进程结束
+        while True:
+            # 根据操作系统类型选择合适的编码方式读取进程输出
+            if sys.platform == "win32":
+                output = self.asr_process.stdout.readline().decode(encoding="gbk")
+            else:
+                output = self.asr_process.stdout.readline().decode()
+
+            # 打印ASR服务的输出信息
+            print(output)
+
+            # 检查ASR服务进程是否已结束
             if self.asr_process.poll() is not None:
                 break
 
-            print(output.decode())
-            if output and "模型加载完毕" in output.decode():
+            # 当输出中包含"模型加载完毕"时，认为ASR服务已启动完成，退出循环
+            if output and "模型加载完毕" in output:
                 break
 
         # 创建并启动麦克风的线程
