@@ -1,10 +1,10 @@
+import os
+import subprocess
 import sys
-from multiprocessing import Event, Process
 
 from PySide6.QtCore import QThread, Signal
 from PySide6.QtWidgets import QApplication, QLabel, QTextEdit, QVBoxLayout, QWidget
 
-from medical_asr.asr_server import AsrServer
 from medical_asr.microphone import MicroPhoneServer
 
 
@@ -37,6 +37,20 @@ class MyWidget(QWidget):
         self._init_servers()
 
     def _init_servers(self):
+        # 创建并启动语音识别服务进程
+        asr_path = os.path.join(os.path.dirname(__file__), 'asr_server.py')
+        self.asr_process = subprocess.Popen(['python', asr_path], stdout=subprocess.PIPE,
+                                            stderr=subprocess.PIPE)
+        while True:
+            output = self.asr_process.stdout.readline()
+
+            if self.asr_process.poll() is not None:
+                break
+
+            print(output.decode())
+            if output and "模型加载完毕" in output.decode():
+                break
+
         # 创建并启动麦克风的线程
         self.mic_thread = MicroPhoneThread()
         self.mic_thread.start()
@@ -47,6 +61,7 @@ class MyWidget(QWidget):
         self.text_box.setText(text)
 
     def closeEvent(self, event):
+        self.asr_process.terminate()
         self.mic_thread.quit()
 
 

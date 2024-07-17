@@ -2,6 +2,7 @@ from medical_asr.microphone import MicroPhoneServer
 
 
 def callback(text: str):
+    """语音识别结果的回调函"""
     print("识别结果：", text)
 
 

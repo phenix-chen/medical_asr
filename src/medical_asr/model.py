@@ -1,4 +1,5 @@
 import os
+import sys
 from typing import Optional
 
 from funasr import AutoModel
@@ -14,7 +15,7 @@ class HotwordCorrect:
         self.std_pinyins = [self.parser.get_pinyin(hw) for hw in self.std_hotwords]
 
     def read_hotword_file(self, filename):
-        with open(filename, "r") as f:
+        with open(filename, "r", encoding="utf-8") as f:
             hotwords = f.readlines()
         hotwords = [hw.strip() for hw in hotwords]
         return hotwords
@@ -40,8 +41,13 @@ class HotwordCorrect:
 
 class SeacoASRModel:
     def __init__(self, hotword_file: Optional[str] = None, model_dir: Optional[str] = None) -> None:
+        print("hotword_file: ", hotword_file)
+        self.hotword_str = ""
+        if sys.platform == "win32":
+            with open(hotword_file, "r", encoding="utf-8") as f:
+                content = f.readlines()
+                self.hotword_str = " ".join(line.strip() for line in content)
 
-        self.hotword_file = hotword_file
         if model_dir is None:
             home = os.path.expanduser("~")
             model_dir = os.path.join(home, ".cache/modelscope/hub")
@@ -60,7 +66,6 @@ class SeacoASRModel:
         self.pre_chunk_num = 60
 
         self.hotword_corrector = HotwordCorrect(hotword_file) if hotword_file else None
-        print(hotword_file)
 
     def vad(self, audio_in: bytes, is_final=False):
 
@@ -80,7 +85,7 @@ class SeacoASRModel:
     def asr(self, audio_in) -> str:
         rec_result = self.asr_model.generate(
             audio_in,
-            hotword=self.hotword_file,
+            hotword=self.hotword_str,
         )
         return rec_result[0]
 
