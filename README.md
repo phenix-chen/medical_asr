@@ -1,7 +1,7 @@
 ## 安装
 
 ```
-sudo apt install build-essential portaudio19-dev
+sudo apt install build-essential portaudio19-dev ffmpeg
 pip install -r requirements.txt
 pip install .
 ```
@@ -45,3 +45,8 @@ python bin/example3/gui.py
 ``` shell
 python bin/example4/gui.py
 ``` 
+
+## FAQ
+
+Q：为什么启动服务要等待那么久？
+A：1. 依赖包funasr导入时间较长 2. 服务端启动需要加载模型，加载模型需要时间。
