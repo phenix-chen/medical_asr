@@ -1,3 +1,10 @@
+## 架构简介
+
+- 语音识别程序主要包含两部分，一部分是语音识别模型，另一部分是麦克风录音模块。
+- `medical_src.microphone`模块负责从麦克风中读取音频数据，然后将音频数据通过websocket传递给语音识别模型进行识别，音频格式为bytes。
+- `medical_src.asr_server`是语音识别模型的websocket服务端，负责接收音频数据，进行识别，然后将识别结果返回给客户端，识别结果格式为str。
+- 模型存放位置为`~/.cache/modelscope/hub/`，语音识别服务运行前，会检查模型是否存在，如果不存在会自动下载模型。
+
 ## 安装
 
 ```
@@ -5,13 +12,6 @@ sudo apt install build-essential portaudio19-dev ffmpeg
 pip install -r requirements.txt
 pip install .
 ```
-
-## 架构简介
-
-- 语音识别程序主要包含两部分，一部分是语音识别模型，另一部分是麦克风录音模块。
-- `medical_src.microphone`模块负责从麦克风中读取音频数据，然后将音频数据通过websocket传递给语音识别模型进行识别，音频格式为bytes。
-- `medical_src.asr_server`是语音识别模型的websocket服务端，负责接收音频数据，进行识别，然后将识别结果返回给客户端，识别结果格式为str。
-- 模型存放位置为`~/.cache/modelscope/hub/`，语音识别服务运行前，会检查模型是否存在，如果不存在会自动下载模型。
 
 ## Examples
 
