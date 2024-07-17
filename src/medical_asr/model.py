@@ -44,7 +44,7 @@ class SeacoASRModel:
         self.hotword_file = hotword_file
         if model_dir is None:
             home = os.path.expanduser("~")
-            model_dir = os.path.join(home, r".cache\modelscope\hub")
+            model_dir = os.path.join(home, ".cache/modelscope/hub")
 
         model, vad = check_or_download_models(model_dir)
         self.asr_model = AutoModel(

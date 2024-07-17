@@ -1,6 +1,7 @@
 ## 安装
 
 ```
+sudo apt install build-essential portaudio19-dev
 pip install -r requirements.txt
 pip install .
 ```
