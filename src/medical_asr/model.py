@@ -1,4 +1,5 @@
 import os
+from typing import Optional
 
 from funasr import AutoModel
 from xpinyin import Pinyin
@@ -38,15 +39,14 @@ class HotwordCorrect:
 
 
 class SeacoASRModel:
-    def __init__(self) -> None:
-        # model, vad = check_or_download_models()
+    def __init__(self, hotword_file: Optional[str] = None, model_dir: Optional[str] = None) -> None:
 
-        model = "iic/speech_seaco_paraformer_large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
-        vad = "iic/speech_fsmn_vad_zh-cn-16k-common-pytorch"
-        home = os.path.expanduser("~")
-        path = os.path.join(home, r".cache\modelscope\hub")
-        model = os.path.join(path, model)
-        vad = os.path.join(path, vad)
+        self.hotword_file = hotword_file
+        if model_dir is None:
+            home = os.path.expanduser("~")
+            model_dir = os.path.join(home, r".cache\modelscope\hub")
+
+        model, vad = check_or_download_models(model_dir)
         self.asr_model = AutoModel(
             disable_pbar=True,
             model=model,
@@ -55,10 +55,12 @@ class SeacoASRModel:
         self.vad_model = AutoModel(model=vad, model_revision="v2.0.4", max_end_silence_time=800, speech_noise_thres=0.9)
         self.chunk_size = 60
         self.frames = []
-        self.hotword_corrector = HotwordCorrect("hotword.txt")
         self.cache = {}
         self.start_chunk_num = 0
         self.pre_chunk_num = 60
+
+        self.hotword_corrector = HotwordCorrect(hotword_file) if hotword_file else None
+        print(hotword_file)
 
     def vad(self, audio_in: bytes, is_final=False):
 
@@ -78,7 +80,7 @@ class SeacoASRModel:
     def asr(self, audio_in) -> str:
         rec_result = self.asr_model.generate(
             audio_in,
-            hotword="..\\assets\\hotword.txt",
+            hotword=self.hotword_file,
         )
         return rec_result[0]
 
@@ -98,7 +100,9 @@ class SeacoASRModel:
             self.cache = {}
             self.frames = []
             text = "".join(result["text"].split())
-            text = self.hotword_corrector.correct(text)
+
+            if self.hotword_corrector:
+                text = self.hotword_corrector.correct(text)
 
             self.start_chunk_num = 0
             return text

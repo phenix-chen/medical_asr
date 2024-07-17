@@ -1,3 +1,4 @@
+import os
 import sys
 from multiprocessing import Event, Process
 
@@ -30,7 +31,9 @@ class AsrProcess(Process):
         self.event = event
 
     def run(self):
-        asr_server = AsrServer()  # 加载模型，需要6-7s
+        # 设置热词文件路径
+        hotword_file = os.path.join(os.path.dirname(__file__), "hotword.txt")
+        asr_server = AsrServer(hotword_file)  # 加载模型，需要6-7s
         self.event.set()  # 通知客户端可以启动了
         asr_server.start()  # 通过 asyncio 运行服务
 
